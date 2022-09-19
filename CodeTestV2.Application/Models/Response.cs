@@ -1,15 +1,14 @@
-﻿using CodeTestV2.Core.Models;
+﻿using CodeTestV2.Core.Interfaces.Employees;
+using CodeTestV2.Core.Models;
 
 namespace CodeTestV2.Application.Models;
 
-public class Response : IResponse<Employee>
+public class Response : IResponse<Employee> 
 {
-    public Response(long? count, IList<Employee> data)
+    public Response(IList<Employee> data)
     {
-        Count = count;
         Data = data;
     }
-
-    public long? Count { get; }
+    
     public IList<Employee> Data { get; }
 }

@@ -3,11 +3,11 @@ using CodeTestV2.Core.Models;
 
 namespace CodeTestV2.Core.Interfaces.Services;
 
-public interface IEmployeeService<TResponse, T> 
-    where T : IEmployee
-    where TResponse : IResponse<T>
+public interface IEmployeeService<T> 
+    where T : class, IEmployee 
+
 {
     Task<T?> GetEmployeeAsync(int employeeId, CancellationToken token);
-    Task<TResponse> ListEmployees(IQuery employeeQuery, CancellationToken token);
+    Task<IResponse<T>> ListEmployees(IQuery employeeQuery, CancellationToken token);
     Task<T> UpdateEmployeeAsync(T employee, CancellationToken token);
 }

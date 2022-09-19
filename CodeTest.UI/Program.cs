@@ -5,7 +5,7 @@ using CodeTestV2.Core.Interfaces.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddSingleton<EmployeeContext>();
-builder.Services.AddScoped<IEmployeeService<Response, Employee>, EmployeeService>();
+builder.Services.AddScoped<IEmployeeService<Employee>, EmployeeService>();
 
 // Add services to the container.
 builder.Services.AddRazorPages();

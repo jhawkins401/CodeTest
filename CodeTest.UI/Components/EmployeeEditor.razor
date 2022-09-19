@@ -1,63 +1,60 @@
 ﻿@using CodeTestV2.Application.Models
 @using CodeTestV2.Application.Services
 @using CodeTestV2.Core.Interfaces.Services
-@inject IEmployeeService<Response, Employee> EmployeeService
+@inject IEmployeeService<Employee> EmployeeService
 
-<div class="content-container">
-    
-    <div>
-        @if (!string.IsNullOrEmpty(errorMessage))
-        {
-            <div style="display: flex; flex-direction: column">
-                <span>Something went wrong here are some details</span>
-                <span style="color: red">@errorMessage</span>
-            </div>
-        }
-        else
-        {
-            <div class="employees-container">
-                <div style="display: flex; flex-direction: row; flex-wrap: wrap; justify-content: space-around;">
+<div>
+    <div class="employees-container">
+        <div style="display: flex; flex-direction: row; flex-wrap: wrap; justify-content: space-around;">
 
-                    @foreach (var emp in EmployeeCollection)
-                    {
-                        <EmployeeTile Employee="emp" OnEmployeeWork="OnWorkClicked" OnEmployeeVacation="OnVacationClicked"/>
-                    }
-                </div>
-            </div>
-        }
+            @foreach (var emp in EmployeeCollection)
+            {
+                <EmployeeTile Employee="emp" OnEmployeeWork="OnWorkClicked" OnEmployeeVacation="OnVacationClicked"/>
+            }
+        </div>
     </div>
-
-
 </div>
 
-@code {
-    string errorMessage = string.Empty;
-    
-    private long daysWorked = 0;
-    private long vacationDays = 0;
 
+@code {
     bool queued = false;
 
     // Update employee's work.
-    private async Task OnWorkClicked((Employee employee, long workDays) workArgs)
+    private async Task OnWorkClicked((Employee employee, ushort workDays) workArgs)
     {
         var (employee, days) = workArgs;
         if (employee is null || days <= 0) await Task.CompletedTask;
         
-        employee.Work((int)days);
+        try
+        {
+            employee.Work(days);
 
-        await EmployeeService.UpdateEmployeeAsync(employee, CancellationToken.None);
+            await UpdateEmployee(employee);
+        }
+        catch (Exception e)
+        {
+            await OnException.InvokeAsync(e.Message);
+        }
     }
     
     // Update employee's vacation.
-    private async Task OnVacationClicked((Employee employee, long vacationDays) vacationArgs)
+    private async Task OnVacationClicked((Employee employee, ushort vacationDays) vacationArgs)
     {
         var (employee, days) = vacationArgs;
         if (employee is null || days <= 0) await Task.CompletedTask;
         
-        employee.TakeVacation((int)days);
+        try
+        {
+            employee.TakeVacation(days);
 
-        await UpdateEmployee(employee);
+            await UpdateEmployee(employee);
+        }
+        catch (Exception e)
+        {
+            await OnException.InvokeAsync(e.Message);
+        }
+        
+
     }
     
     CancellationTokenSource tokenSource = new();
@@ -87,9 +84,9 @@
         catch (TaskCanceledException)
         {
         }
-        catch (Exception)
+        catch (Exception e)
         {
-            // ignored
+            await OnException.InvokeAsync(e.Message);
         }
         finally
         {
@@ -102,4 +99,7 @@
     
     [Parameter]
     public EventCallback OnEmployeeUpdated { get; set; }
+    
+    [Parameter]
+    public EventCallback<string> OnException { get; set; }
 }

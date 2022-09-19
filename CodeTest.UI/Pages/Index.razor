@@ -1,22 +1,19 @@
 ﻿@page "/"
 @using CodeTestV2.Core.Interfaces.Services
 @using CodeTestV2.Application.Models
-@inject IEmployeeService<Response, Employee> EmployeeService
+@inject IEmployeeService<Employee> EmployeeService
 
 <div style="display:flex;flex-direction:row">
     <h1>Employee Editor</h1>
     <div class="content-container">
         @if (!string.IsNullOrEmpty(errorMessage))
         {
-            <div style="display: flex; flex-direction: column">
-                <span>Something went wrong here are some details</span>
+            <div>
+                <span>Something went wrong here are some details:</span>
                 <span style="color: red">@errorMessage</span>
             </div>
         }
-        else
-        {
-            <EmployeeEditor OnEmployeeUpdated="OnEmployeeUpdated" EmployeeCollection="employeeData"/>
-        }
+        <EmployeeEditor OnException="OnException" OnEmployeeUpdated="OnEmployeeUpdated" EmployeeCollection="employeeData"/>
     </div>
 </div>
 
@@ -34,14 +31,20 @@
 
     private Task OnEmployeeUpdated()
     {
+        errorMessage = string.Empty;
+        return OnEmployeeFetchAsync();
+    }
+
+    private Task OnException(string message)
+    {
+        errorMessage = message;
         return OnEmployeeFetchAsync();
     }
 
     private async Task OnEmployeeFetchAsync()
     {
         employeeData.Clear();
-        errorMessage = string.Empty;
-
+        
         try
         {
             var result = await EmployeeService.ListEmployees(new Request(0, 30), CancellationToken.None);

@@ -41,8 +41,8 @@
 
 @code {
 
-    long daysWorked;
-    long vacationDays;
+    ushort daysWorked;
+    ushort vacationDays;
     
     // Update employee's work.
     private void OnUpdatedWork(ChangeEventArgs args)
@@ -50,7 +50,7 @@
         var stringVal = args.Value?.ToString();
         if (Employee is null || string.IsNullOrEmpty(stringVal)) return;
 
-        var val = long.Parse(args.Value?.ToString());
+        var val = ushort.Parse(stringVal);
         daysWorked = val;
 
     }
@@ -61,17 +61,17 @@
         var stringVal = args.Value?.ToString();
         if (Employee is null || string.IsNullOrEmpty(stringVal)) return;
         
-        var val = int.Parse(stringVal);
+        var val = ushort.Parse(stringVal);
         vacationDays = val;
     }
     
     [Parameter]
-    public Employee Employee { get; set; }
+    public Employee? Employee { get; set; }
 
     [Parameter]
-    public EventCallback<(Employee, long workDays)> OnEmployeeWork { get; set; }
+    public EventCallback<(Employee, ushort workDays)> OnEmployeeWork { get; set; }
 
     [Parameter]
-    public EventCallback<(Employee, long workDays)> OnEmployeeVacation { get; set; }
+    public EventCallback<(Employee, ushort workDays)> OnEmployeeVacation { get; set; }
 
 }

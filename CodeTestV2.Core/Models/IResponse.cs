@@ -1,8 +1,8 @@
-﻿namespace CodeTestV2.Core.Models;
+﻿using CodeTestV2.Core.Interfaces.Employees;
 
-public interface IResponse<TResponse>
+namespace CodeTestV2.Core.Models;
+
+public interface IResponse<TResponse> where TResponse : class, IEmployee 
 {
-    public long? Count { get; }
-    
     public IList<TResponse> Data { get; }
 }
