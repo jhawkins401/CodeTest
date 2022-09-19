@@ -8,6 +8,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\CodeTestV2.Application\CodeTestV2.Application.csproj" />
       <ProjectReference Include="..\CodeTest\CodeTest.csproj" />
     </ItemGroup>
 

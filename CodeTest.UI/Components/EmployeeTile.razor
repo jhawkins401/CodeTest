@@ -1,0 +1,77 @@
+﻿@using CodeTestV2.Application.Models
+<div class="tile-container">
+    <div class="details">
+        <div>
+            <span>EmployeeId:</span>
+            <span>@Employee.EmployeeId</span>
+        </div>
+        
+        <div>
+            <span>Role:</span>
+            <span>@Employee.EmployeeType</span>
+        </div>
+
+
+        <div>
+            <span>Days Worked This Year:</span>
+            <span>@Employee.TotalDaysWorkedThisYear.ToString("N3")</span>
+        </div>
+
+        <div>
+            <span>Vacation Days Accumulated:</span>
+            <span>@Employee.VacationDaysAccumulated.ToString("N3")</span>
+        </div>
+
+        <div>
+            <span>Vacation Current Balance:</span>
+            <span>@Employee.VacationDaysCurrentBalance.ToString("N3")</span>
+        </div>
+    </div>
+
+    <div class="footer">
+        <span style="padding-right: 5px;">Work Days To Add:</span>
+        <input id="workInput" type="number" class="form-control" value="@daysWorked" @onchange="OnUpdatedWork">
+        <button class="btn btn-primary" @onclick="() => OnEmployeeWork.InvokeAsync((Employee, daysWorked))">Work</button>
+
+        <span style="padding-right: 5px;">Vacation Days To Take:</span>
+        <input id="vacationInput" type="number" class="form-control" value="@vacationDays" @onchange="OnUpdatedVacation">
+        <button class="btn btn-primary" @onclick="() => OnEmployeeVacation.InvokeAsync((Employee, vacationDays))">Vacation</button>
+    </div>
+</div>
+
+@code {
+
+    long daysWorked;
+    long vacationDays;
+    
+    // Update employee's work.
+    private void OnUpdatedWork(ChangeEventArgs args)
+    {
+        var stringVal = args.Value?.ToString();
+        if (Employee is null || string.IsNullOrEmpty(stringVal)) return;
+
+        var val = long.Parse(args.Value?.ToString());
+        daysWorked = val;
+
+    }
+    
+    // Update employee's vacation.
+    private void OnUpdatedVacation(ChangeEventArgs args)
+    {
+        var stringVal = args.Value?.ToString();
+        if (Employee is null || string.IsNullOrEmpty(stringVal)) return;
+        
+        var val = int.Parse(stringVal);
+        vacationDays = val;
+    }
+    
+    [Parameter]
+    public Employee Employee { get; set; }
+
+    [Parameter]
+    public EventCallback<(Employee, long workDays)> OnEmployeeWork { get; set; }
+
+    [Parameter]
+    public EventCallback<(Employee, long workDays)> OnEmployeeVacation { get; set; }
+
+}

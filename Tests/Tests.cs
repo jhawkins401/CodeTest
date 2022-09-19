@@ -6,8 +6,6 @@ namespace Tests;
 
 public class UnitTest1
 {
-    //WORK
-    
     [Fact] 
     public void HE_Should_Get_All_Vacation()
     {

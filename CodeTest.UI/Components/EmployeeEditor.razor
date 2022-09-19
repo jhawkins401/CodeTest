@@ -1,0 +1,105 @@
+﻿@using CodeTestV2.Application.Models
+@using CodeTestV2.Application.Services
+@using CodeTestV2.Core.Interfaces.Services
+@inject IEmployeeService<Response, Employee> EmployeeService
+
+<div class="content-container">
+    
+    <div>
+        @if (!string.IsNullOrEmpty(errorMessage))
+        {
+            <div style="display: flex; flex-direction: column">
+                <span>Something went wrong here are some details</span>
+                <span style="color: red">@errorMessage</span>
+            </div>
+        }
+        else
+        {
+            <div class="employees-container">
+                <div style="display: flex; flex-direction: row; flex-wrap: wrap; justify-content: space-around;">
+
+                    @foreach (var emp in EmployeeCollection)
+                    {
+                        <EmployeeTile Employee="emp" OnEmployeeWork="OnWorkClicked" OnEmployeeVacation="OnVacationClicked"/>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+
+
+</div>
+
+@code {
+    string errorMessage = string.Empty;
+    
+    private long daysWorked = 0;
+    private long vacationDays = 0;
+
+    bool queued = false;
+
+    // Update employee's work.
+    private async Task OnWorkClicked((Employee employee, long workDays) workArgs)
+    {
+        var (employee, days) = workArgs;
+        if (employee is null || days <= 0) await Task.CompletedTask;
+        
+        employee.Work((int)days);
+
+        await EmployeeService.UpdateEmployeeAsync(employee, CancellationToken.None);
+    }
+    
+    // Update employee's vacation.
+    private async Task OnVacationClicked((Employee employee, long vacationDays) vacationArgs)
+    {
+        var (employee, days) = vacationArgs;
+        if (employee is null || days <= 0) await Task.CompletedTask;
+        
+        employee.TakeVacation((int)days);
+
+        await UpdateEmployee(employee);
+    }
+    
+    CancellationTokenSource tokenSource = new();
+    
+    // update and save employee changes.
+    private async Task UpdateEmployee(Employee employee)
+    {
+        if (employee is null 
+            || EmployeeCollection is null 
+            ||  !EmployeeCollection.Any()) 
+                await Task.CompletedTask;
+
+        try
+        {
+            if (queued)
+            {
+                tokenSource.Cancel();
+                tokenSource = new CancellationTokenSource();
+            }
+            
+            queued = true;
+
+            await Task.Delay(400, tokenSource.Token);
+
+            await EmployeeService.UpdateEmployeeAsync(employee, tokenSource.Token);
+        }
+        catch (TaskCanceledException)
+        {
+        }
+        catch (Exception)
+        {
+            // ignored
+        }
+        finally
+        {
+            queued = false;
+        }
+    }
+    
+    [Parameter]
+    public IList<Employee> EmployeeCollection { get; set; }
+    
+    [Parameter]
+    public EventCallback OnEmployeeUpdated { get; set; }
+}
